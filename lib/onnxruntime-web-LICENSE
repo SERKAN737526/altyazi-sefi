@@ -1,0 +1,6 @@
+onnxruntime-web (bundled inside lib/transformers/ by @huggingface/transformers 3.7.5)
+Copyright (c) Microsoft Corporation. Licensed under the MIT License.
+https://github.com/microsoft/onnxruntime/blob/main/LICENSE
+
+tessdata eng.traineddata (4.0.0_best_int) — Copyright Google / Tesseract OCR contributors,
+Apache License 2.0, https://github.com/tesseract-ocr/tessdata_best

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="tr" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://www.youtube.com https://s.ytimg.com; worker-src 'self' blob:; connect-src 'self' blob: data: https://huggingface.co https://*.huggingface.co https://*.hf.co https://translate.googleapis.com https://api.mymemory.translated.net; img-src 'self' data: blob: https://i.ytimg.com; media-src 'self' blob: mediastream:; frame-src https://www.youtube-nocookie.com https://www.youtube.com; style-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Altyazı Şefi: yabancı altyazı ve konuşmayı Türkçeye çevirin</title>
+  <meta name="description" content="Kurulum gerektirmeyen tarayıcı uygulaması: sekmedeki videonun altyazısını veya konuşmasını, video dosyalarını ve YouTube videolarını anında Türkçeye çevirir.">
+  <meta name="theme-color" content="#0a0f1e">
+  <meta name="color-scheme" content="dark">
+  <meta name="application-name" content="Altyazı Şefi">
+  <meta name="apple-mobile-web-app-title" content="Altyazı Şefi">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" href="icons/logo.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/app.css">
+  <script defer src="lib/tesseract/tesseract.min.js"></script>
+  <script defer src="js/ns.js"></script>
+  <script defer src="js/srt.js"></script>
+  <script defer src="js/translate.js"></script>
+  <script defer src="js/assembler.js"></script>
+  <script defer src="js/ocr.js"></script>
+  <script defer src="js/audio.js"></script>
+  <script defer src="js/asr.js"></script>
+  <script defer src="js/subs.js"></script>
+  <script defer src="js/live.js"></script>
+  <script defer src="js/filemode.js"></script>
+  <script defer src="js/youtube.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <div id="as-root" class="as-app">
+    <div class="as-boot" id="as-boot">
+      <img class="as-boot__logo" src="icons/logo.svg" alt="" width="96" height="96">
+      <div class="as-boot__name">Altyazı Şefi</div>
+      <div class="as-boot__msg" id="as-boot-msg">Yükleniyor…</div>
+      <noscript>
+        <p class="as-noscript">Altyazı Şefi çalışmak için JavaScript gerektirir. Lütfen tarayıcınızda JavaScript'i açın ve sayfayı yenileyin.</p>
+      </noscript>
+    </div>
+  </div>
+</body>
+</html>
