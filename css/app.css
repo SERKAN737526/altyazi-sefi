@@ -600,3 +600,8 @@ html.as-pip-doc, html.as-pip-doc body { margin: 0; height: 100%; background: #00
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
+
+/* YouTube yer imi düğmesi (sürüklenir) */
+.as-bm-link { cursor: grab; }
+.as-bm-link:active { cursor: grabbing; }
+.as-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }

@@ -9,7 +9,7 @@
  * Kitaplık veya kabuk değişince VERSION artırılır; eski "as-shell-*" / "as-lib-*" önbellekleri silinir. */
 'use strict';
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const SHELL_CACHE = 'as-shell-' + VERSION;
 const LIB_CACHE = 'as-lib-' + VERSION;
 const OWN_PREFIXES = ['as-shell-', 'as-lib-'];
@@ -33,6 +33,7 @@ const SHELL_FILES = [
   'js/live.js',
   'js/ticker-worker.js',
   'js/filemode.js',
+  'js/yt-bookmarklet.js',
   'js/youtube.js',
   'js/app.js',
   'icons/logo.svg',

@@ -258,20 +258,81 @@
     left.style.gap = '12px';
     left.style.minWidth = '0';
 
+    var bmCard = bookmarkletCard();
     s.srcCard = k.card('subtitle', 'Türkçe altyazı', '');
     s.srcCard.node.setAttribute('data-role', 'source-card');
     var notes = k.card('info', 'Bilmeniz gerekenler');
     notes.body.appendChild(el('ul', { class: 'as-hint', style: { margin: '0', paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' } },
-      el('li', null, 'YouTube oynatıcısının içindeki reklamlar bir web sitesi tarafından kaldırılamaz.'),
+      el('li', null, 'Bu sayfadaki gömülü oynatıcının içindeki reklamlara bir web sitesi dokunamaz. Reklamsız izlemek için videoyu YouTube\'da açıp "Altyazı Şefi (YouTube)" yer imine tıklayın; reklamlar atlanır.'),
       el('li', null, 'Tam ekran için oynatıcının kendi düğmesini değil, videonun altındaki "Tam ekran" düğmesini kullanın; Türkçe altyazı ancak böyle görünür.'),
-      el('li', null, 'Bazı video sahipleri başka sitelerde oynatmayı kapatır. O zaman videoyu YouTube\'da açıp "Canlı çeviri" bölümünde o sekmeyi paylaşın.'),
-      el('li', null, 'YouTube\'un kendi altyazılarını çevirmek için de videoyu YouTube\'da açıp "Canlı çeviri" bölümünü kullanabilirsiniz.')));
-    var right = el('div', { class: 'as-col' }, s.srcCard.node, notes.node);
+      el('li', null, 'Bazı video sahipleri başka sitelerde oynatmayı kapatır. O zaman videoyu YouTube\'da açıp "Altyazı Şefi (YouTube)" yer imi düğmesini ya da "Canlı çeviri" bölümünü kullanın.'),
+      el('li', null, 'Videonun YouTube\'daki kendi altyazısını Türkçe izlemenin en kolay yolu "Altyazı Şefi (YouTube)" yer imi düğmesidir.')));
+    var right = el('div', { class: 'as-col' }, bmCard.node, s.srcCard.node, notes.node);
     right.style.gap = '16px';
     right.style.minWidth = '0';
 
     s.root = el('div', { class: 'as-col', 'data-mode-root': 'youtube' }, linkCard.node, el('div', { class: 'as-split' }, left, right));
     s.root.style.gap = '16px';
+  }
+
+  /** Yer imi düğmesinin adresi: AS.ytBookmarklet kaynağı, tam satır yorumları ve girintileri atılmış hâliyle.
+   *  Yalnızca adreste anlamı olan karakterler kodlanır (% # ve satır sonları); tarayıcı çalıştırırken geri çözer. */
+  function bookmarkletHref() {
+    var fn = AS.ytBookmarklet;
+    if (typeof fn !== 'function') return '';
+    var lines = String(fn).split('\n').map(function (l) { return l.trim(); })
+      .filter(function (l) { return l && l.indexOf('//') !== 0; });
+    var src = '(' + lines.join('\n') + ')()';
+    return 'javascript:' + src.replace(/[%#\r\n\t]/g, function (c) { return encodeURIComponent(c); });
+  }
+
+  function bookmarkletCard() {
+    var k = K();
+    var href = bookmarkletHref();
+    var c = k.card('bulb', 'YouTube\'un kendi altyazısı, Türkçe',
+      'Videoyu YouTube\'da izlerken altyazısını Türkçe gösteren ve reklamları atlayan yer imi düğmesi. Program kurulmaz.');
+    c.node.setAttribute('data-role', 'yt-bookmarklet');
+    var msg = el('div', { 'aria-live': 'polite', 'data-role': 'bm-msg' });
+    function show(text, level) { AS.util.clear(msg); msg.appendChild(k.note(level, text)); }
+    if (!href) {
+      c.body.appendChild(k.note('error', 'Yer imi düğmesi yüklenemedi. Sayfayı yenileyin.'));
+      return c;
+    }
+    var link = el('a', {
+      class: 'as-btn as-btn--primary as-bm-link', href: href, draggable: 'true', 'data-role': 'bm-link',
+      title: 'Bu düğmeyi tarayıcının yer imleri çubuğuna sürükleyin',
+      on: {
+        click: function (e) {
+          e.preventDefault();
+          show('Bu düğmeye burada tıklamayın. Fareyle tutup tarayıcının yer imleri çubuğuna sürükleyin.', 'info');
+        }
+      }
+    }, k.icon('youtube'), el('span', null, 'Altyazı Şefi (YouTube)'));
+    var copy = k.button('Kodu kopyala', {
+      cls: 'as-btn--sm as-btn--ghost', role: 'bm-copy',
+      title: 'Sürükleme olmuyorsa (ör. Safari): kodu kopyalayıp yeni bir yer iminin adresine yapıştırın',
+      onClick: function () {
+        var done = function () { show('Kopyalandı. Yeni bir yer imi ekleyin, adı "Altyazı Şefi" olsun, adres (URL) kısmına yapıştırın.', 'ok'); };
+        var fail = function () { show('Kopyalanamadı. Düğmeyi yer imleri çubuğuna sürükleyerek ekleyin.', 'warn'); };
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(href).then(done, fail);
+          else fail();
+        } catch (e) { fail(); }
+      }
+    });
+    var row = el('div', { class: 'as-row' }, link, copy);
+    var mac = AS.util.browser().mac;
+    var steps = el('ol', { class: 'as-hint as-steps' },
+      el('li', null, 'Yer imleri çubuğunu açın: ' + (mac ? 'Cmd+Shift+B' : 'Ctrl+Shift+B') + '.'),
+      el('li', null, 'Turuncu "Altyazı Şefi (YouTube)" düğmesini fareyle tutup yer imleri çubuğuna bırakın. Bunu bir kez yapmanız yeterli.'),
+      el('li', null, 'YouTube\'da bir video açıp yer imleri çubuğundaki "Altyazı Şefi (YouTube)"a tıklayın. Türkçe altyazı videonun üstünde çıkar, reklamlar atlanır. Sağ üstteki panelden altyazı dilini seçebilir, Türkçe SRT indirebilir, reklam atlamayı kapatabilirsiniz.'));
+    c.body.appendChild(row);
+    c.body.appendChild(msg);
+    c.body.appendChild(steps);
+    c.body.appendChild(el('p', { class: 'as-hint' },
+      'Videonun hangi dilde altyazısı varsa o kullanılır; Türkçe altyazı varsa çevrilmeden gösterilir. Çeviri için yalnızca altyazı metni ' +
+      'Google Çeviri\'ye gider (Chrome\'un cihaz içi çevirmeni varsa hiçbir şey gitmez). Videonun hiç altyazısı yoksa "Canlı çeviri" bölümünü kullanın.'));
+    return c;
   }
 
   function showLinkError(s, msg) {

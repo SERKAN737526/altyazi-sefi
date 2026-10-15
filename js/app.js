@@ -998,7 +998,10 @@
       li('Videonun altyazısı elinizde (', ['.srt / .vtt'], ') varsa yükleyin; video ile zamanlı eşleşir.'),
       li('Altyazı yoksa ', ['"Videonun sesinden altyazı"'], ' düğmesine basın; açılan pencerede ', ['"Bu sekme"'], 'yi seçip sekme sesini paylaşın, konuşma Türkçeye çevrilir (Chrome ve Edge).'),
       li('Tam ekran için oynatıcının kendi düğmesini değil, videonun altındaki ', ['"Tam ekran"'], ' düğmesini kullanın; Türkçe altyazı ancak böyle görünür.')));
-    yt.appendChild(el('p', null, 'Not: YouTube oynatıcısının içindeki reklamlar kaldırılamaz.'));
+    yt.appendChild(el('p', null, 'Videonun YouTube\'daki kendi altyazısını (hangi dilde olursa) Türkçe izlemek için: YouTube bölümündeki ',
+      el('strong', null, '"Altyazı Şefi (YouTube)"'), ' düğmesini bir kez yer imleri çubuğuna sürükleyin. YouTube\'da videoyu açıp bu yer imine tıklayın; ' +
+      'Türkçe altyazı videonun üstünde çıkar, sağ üstteki panelden Türkçe SRT indirebilirsiniz.'));
+    yt.appendChild(el('p', null, 'Reklamlar: Bu sitedeki gömülü oynatıcının içindeki reklamlara bir web sitesi dokunamaz. Reklamsız izlemek için videoyu YouTube\'da açıp "Altyazı Şefi (YouTube)" yer imine tıklayın; reklamlar atlanır.'));
 
     var pipCard = card('pip', 'Altyazı penceresi', 'Her zaman üstte duran küçük pencere');
     pipCard.appendChild(el('ul', null,

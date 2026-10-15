@@ -18,7 +18,17 @@ Windows, Mac ve Linux'ta çalışır.
 2. **Video dosyası**: Bilgisayarındaki videoyu aç. Yanında .srt/.vtt altyazı varsa onu çevirir. Yoksa konuşmadan
    altyazı çıkarır. Türkçe SRT dosyasını indirebilirsin.
 3. **YouTube**: Bağlantıyı yapıştır. Video sayfada açılır, altına Türkçe altyazı gelir. Bunun için videonun sesinden
-   altyazı çıkarır ya da bir SRT dosyası kullanır. YouTube'un kendi oynatıcısındaki reklamları bir web sitesi kaldıramaz.
+   altyazı çıkarır ya da bir SRT dosyası kullanır. Bu gömülü oynatıcının içindeki reklamlara bir web sitesi dokunamaz;
+   reklamsız izlemek için aşağıdaki yer imi düğmesini YouTube'un kendi sayfasında kullan.
+
+**YouTube yer imi düğmesi:** YouTube bölümündeki turuncu "Altyazı Şefi (YouTube)" düğmesini bir kez yer imleri
+çubuğuna sürükle (Ctrl+Shift+B / Mac: Cmd+Shift+B çubuğu açar). YouTube'da bir video açıp bu yer imine tıklayınca
+videonun kendi altyazısı (hangi dilde olursa) alınır, Türkçesi videonun üstünde gösterilir. Türkçe altyazı varsa çevrilmez.
+Reklamlar da atlanır (telefon uygulamasındaki yöntemle: reklam alanları gizlenir, sonraki videoların reklam planı
+silinir, yine de reklam başlarsa sesi kısılıp sona sarılır ve "Atla"ya basılır). Sağ üstteki panelden dil seçilir,
+Türkçe SRT indirilir, reklam atlama kapatılabilir. Safari'de sürükleme yerine "Kodu kopyala" ile yeni bir yer
+iminin adresine yapıştır. Bir web sitesi YouTube'un verisini doğrudan okuyamadığı için bu iş YouTube sayfasının içinde,
+yer imiyle yapılır; dışarıdan kod yüklenmez, dışarı yalnızca çevrilecek altyazı metni gider.
 
 ## İnternetsiz kullanım
 
