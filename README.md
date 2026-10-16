@@ -21,7 +21,7 @@ Windows, Mac ve Linux'ta çalışır.
    altyazı çıkarır ya da bir SRT dosyası kullanır. Bu gömülü oynatıcının içindeki reklamlara bir web sitesi dokunamaz;
    reklamsız izlemek için aşağıdaki yer imi düğmesini YouTube'un kendi sayfasında kullan.
 
-**YouTube yer imi düğmesi:** YouTube bölümündeki turuncu "Altyazı Şefi (YouTube)" düğmesini bir kez yer imleri
+**YouTube yer imi düğmesi** (kartta "Nasıl kurulur? Resimli anlatım" düğmesi adım adım gösterir): YouTube bölümündeki turuncu "Altyazı Şefi (YouTube)" düğmesini bir kez yer imleri
 çubuğuna sürükle (Ctrl+Shift+B / Mac: Cmd+Shift+B çubuğu açar). YouTube'da bir video açıp bu yer imine tıklayınca
 videonun kendi altyazısı (hangi dilde olursa) alınır, Türkçesi videonun üstünde gösterilir. Türkçe altyazı varsa çevrilmez.
 Reklamlar da atlanır (telefon uygulamasındaki yöntemle: reklam alanları gizlenir, sonraki videoların reklam planı
@@ -29,6 +29,10 @@ silinir, yine de reklam başlarsa sesi kısılıp sona sarılır ve "Atla"ya bas
 Türkçe SRT indirilir, reklam atlama kapatılabilir. Safari'de sürükleme yerine "Kodu kopyala" ile yeni bir yer
 iminin adresine yapıştır. Bir web sitesi YouTube'un verisini doğrudan okuyamadığı için bu iş YouTube sayfasının içinde,
 yer imiyle yapılır; dışarıdan kod yüklenmez, dışarı yalnızca çevrilecek altyazı metni gider.
+
+## Kilit (izinle kullanım)
+
+Site her bilgisayarda bir **cihaz kodu** gösterir (ör. `K7F3-9QX2`). Kullanıcı bu kodu Serkan'a gönderir; Serkan telefonundaki kod üretici sayfasıyla o bilgisayara özel bir **etkinleştirme kodu** üretip gönderir. Kod yalnızca o bilgisayarda ve o tarayıcıda çalışır, istenirse süreli verilir (1 ay, 3 ay, 1 yıl). Doğrulama bilgisayarda yapılır, internet gerekmez. Tarayıcı verileri silinirse yeni kod gerekir. Bu kilit sıradan izinsiz kullanımı engeller; kodu okuyup değiştirebilen birini durduramaz.
 
 ## İnternetsiz kullanım
 

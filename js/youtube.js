@@ -305,6 +305,16 @@
         click: function (e) {
           e.preventDefault();
           show('Bu düğmeye burada tıklamayın. Fareyle tutup tarayıcının yer imleri çubuğuna sürükleyin.', 'info');
+          openGuide();
+        },
+        dragstart: function () { dragHint(true); },
+        dragend: function (e) {
+          dragHint(false);
+          if (e && e.dataTransfer && e.dataTransfer.dropEffect === 'none') {
+            show('Düğme bir yere bırakılmadı. Adres çubuğunun altındaki yer imleri çubuğuna bırakın. Çubuk görünmüyorsa önce ' + keys('Shift', 'B') + '.', 'warn');
+          } else {
+            show('Yer imleri çubuğunda "Altyazı Şefi (YouTube)" belirdiyse kurulum tamam. Kod adres çubuğuna gittiyse Esc\'ye basıp yeniden deneyin.', 'ok');
+          }
         }
       }
     }, k.icon('youtube'), el('span', null, 'Altyazı Şefi (YouTube)'));
@@ -312,21 +322,22 @@
       cls: 'as-btn--sm as-btn--ghost', role: 'bm-copy',
       title: 'Sürükleme olmuyorsa (ör. Safari): kodu kopyalayıp yeni bir yer iminin adresine yapıştırın',
       onClick: function () {
-        var done = function () { show('Kopyalandı. Yeni bir yer imi ekleyin, adı "Altyazı Şefi" olsun, adres (URL) kısmına yapıştırın.', 'ok'); };
-        var fail = function () { show('Kopyalanamadı. Düğmeyi yer imleri çubuğuna sürükleyerek ekleyin.', 'warn'); };
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(href).then(done, fail);
-          else fail();
-        } catch (e) { fail(); }
+        copyCode(href,
+          function () { show('Kopyalandı. Yeni bir yer imi ekleyin, adı "Altyazı Şefi" olsun, adres (URL) kısmına yapıştırın.', 'ok'); },
+          function () { show('Kopyalanamadı. Düğmeyi yer imleri çubuğuna sürükleyerek ekleyin.', 'warn'); });
       }
     });
+    var guideBtn = k.button('Nasıl kurulur? Resimli anlatım', {
+      cls: 'as-btn--sm as-bm-guide-btn', role: 'bm-guide-open', iconName: 'info',
+      title: 'Yer imi düğmesinin kurulumunu ve kullanımını resimlerle gösterir', onClick: function () { openGuide(); }
+    });
     var row = el('div', { class: 'as-row' }, link, copy);
-    var mac = AS.util.browser().mac;
     var steps = el('ol', { class: 'as-hint as-steps' },
-      el('li', null, 'Yer imleri çubuğunu açın: ' + (mac ? 'Cmd+Shift+B' : 'Ctrl+Shift+B') + '.'),
-      el('li', null, 'Turuncu "Altyazı Şefi (YouTube)" düğmesini fareyle tutup yer imleri çubuğuna bırakın. Bunu bir kez yapmanız yeterli.'),
-      el('li', null, 'YouTube\'da bir video açıp yer imleri çubuğundaki "Altyazı Şefi (YouTube)"a tıklayın. Türkçe altyazı videonun üstünde çıkar, reklamlar atlanır. Sağ üstteki panelden altyazı dilini seçebilir, Türkçe SRT indirebilir, reklam atlamayı kapatabilirsiniz.'));
+      el('li', null, 'Yer imleri çubuğunu açın: ' + keys('Shift', 'B') + '.'),
+      el('li', null, 'Turuncu "Altyazı Şefi (YouTube)" düğmesini fareyle tutup yer imleri çubuğuna bırakın. Adres çubuğuna bırakmayın. Bunu bir kez yapmanız yeterli.'),
+      el('li', null, 'YouTube\'un kendi sayfasında bir video açıp yer imleri çubuğundaki "Altyazı Şefi (YouTube)"a tıklayın. Türkçe altyazı videonun üstünde çıkar, reklamlar atlanır. Sağ üstteki panelden altyazı dilini seçebilir, Türkçe SRT indirebilir, reklam atlamayı kapatabilirsiniz.'));
     c.body.appendChild(row);
+    c.body.appendChild(guideBtn);
     c.body.appendChild(msg);
     c.body.appendChild(steps);
     c.body.appendChild(el('p', { class: 'as-hint' },
@@ -334,6 +345,176 @@
       'Google Çeviri\'ye gider (Chrome\'un cihaz içi çevirmeni varsa hiçbir şey gitmez). Videonun hiç altyazısı yoksa "Canlı çeviri" bölümünü kullanın.'));
     return c;
   }
+
+  function copyCode(text, done, fail) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fail);
+      else fail();
+    } catch (e) { fail(); }
+  }
+
+  /* ---------- Yer imi düğmesi: resimli kurulum anlatımı ve sürükleme ipucu ---------- */
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var guideDlg = null;
+  var hintEl = null;
+
+  function isMac() { var b = AS.util.browser(); return !!(b && b.mac); }
+  /** keys('Shift','B') → "Ctrl+Shift+B" (Mac'te Cmd) */
+  function keys() { return [isMac() ? 'Cmd' : 'Ctrl'].concat([].slice.call(arguments)).join('+'); }
+  /** Aynı tuşlar <kbd> kutularıyla */
+  function kbds() {
+    var parts = [isMac() ? 'Cmd' : 'Ctrl'].concat([].slice.call(arguments));
+    var out = el('span', { class: 'as-gd-keys' });
+    for (var i = 0; i < parts.length; i++) {
+      if (i) out.appendChild(document.createTextNode(' + '));
+      out.appendChild(el('kbd', { class: 'as-kbd' }, parts[i]));
+    }
+    return out;
+  }
+  function svg(w, h, shapes, cls) {
+    var s = document.createElementNS(SVGNS, 'svg');
+    s.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    s.setAttribute('width', String(w));
+    s.setAttribute('height', String(h));
+    s.setAttribute('aria-hidden', 'true');
+    s.setAttribute('focusable', 'false');
+    if (cls) s.setAttribute('class', cls);
+    for (var i = 0; i < shapes.length; i++) {
+      var c = document.createElementNS(SVGNS, shapes[i][0]);
+      var a = shapes[i][1];
+      for (var key in a) if (Object.prototype.hasOwnProperty.call(a, key)) c.setAttribute(key, String(a[key]));
+      s.appendChild(c);
+    }
+    return s;
+  }
+  function arrowUp(cls, h) {
+    h = h || 54;
+    return svg(40, h, [
+      ['path', { d: 'M20 ' + (h - 2) + ' V10', stroke: 'currentColor', 'stroke-width': 3, 'stroke-dasharray': '5 5', fill: 'none' }],
+      ['path', { d: 'M9 19 L20 6 L31 19', stroke: 'currentColor', 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }]
+    ], cls);
+  }
+  function tag(text, kind) { return el('span', { class: 'as-gm__tag as-gm__tag--' + kind }, text); }
+
+  /** Çizim: küçük tarayıcı penceresi. o: {label, url, urlNo, bar: 'hl'|'drop'|'click', page} */
+  function mock(o) {
+    var top = el('div', { class: 'as-gm__top' },
+      el('span', { class: 'as-gm__dots' }, el('i'), el('i'), el('i')),
+      el('span', { class: 'as-gm__url' + (o.urlNo ? ' is-no' : '') }, o.url));
+    if (o.urlNo) top.appendChild(tag('✕ Buraya değil', 'no'));
+    var bar = el('div', { class: 'as-gm__bar is-' + o.bar }, el('span', { class: 'as-gm__chip' }, 'Gmail'));
+    if (o.bar === 'hl') bar.appendChild(tag('Yer imleri çubuğu', 'hl'));
+    if (o.bar === 'drop') {
+      bar.appendChild(el('span', { class: 'as-gm__chip as-gm__chip--target' }, 'Altyazı Şefi (YouTube)'));
+      bar.appendChild(tag('✓ Buraya bırak', 'ok'));
+    }
+    if (o.bar === 'click') {
+      bar.appendChild(el('span', { class: 'as-gm__chip as-gm__chip--click' }, 'Altyazı Şefi (YouTube)'));
+      bar.appendChild(svg(18, 22, [['path', { d: 'M2 1 L2 17 L6 13 L9 20 L12 19 L9 12 L15 12 Z', fill: '#ffffff', stroke: '#0a0f1e', 'stroke-width': 1.5, 'stroke-linejoin': 'round' }]], 'as-gm__cursor'));
+    }
+    return el('div', { class: 'as-gm', role: 'img', 'aria-label': o.label }, top, bar, el('div', { class: 'as-gm__page' }, o.page));
+  }
+
+  function guideStep(title, text, fig) {
+    return el('li', { class: 'as-guide__step' }, el('h3', null, title), el('p', null, text), fig || null);
+  }
+
+  function buildGuide() {
+    var k = K();
+    var dlg = el('dialog', { class: 'as-guide', 'data-role': 'bm-guide', 'aria-labelledby': 'as-guide-title' });
+    function close() { if (dlg.open) { try { dlg.close(); } catch (e) { dlg.removeAttribute('open'); } } }
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) close(); });   // arka plana tıklayınca kapanır
+    var gmsg = el('div', { 'aria-live': 'polite', 'data-role': 'bm-guide-msg' });
+    var copy = k.button('Kodu kopyala', {
+      cls: 'as-btn--sm', role: 'bm-guide-copy', iconName: 'download',
+      onClick: function () {
+        // art arda basışta tek ileti kalsın: temizleme yanıt gelince yapılır
+        var say = function (level, text) { AS.util.clear(gmsg); gmsg.appendChild(k.note(level, text)); };
+        AS.util.clear(gmsg);
+        copyCode(bookmarkletHref(),
+          function () { say('ok', 'Kopyalandı. Şimdi 3. ve 4. adımı yapın.'); },
+          function () { say('warn', 'Kopyalanamadı. Sitedeki "Kodu kopyala" düğmesini deneyin.'); });
+      }
+    });
+    var shot = el('figure', { class: 'as-guide__fig' },
+      el('img', { src: 'img/yer-imi-ornek.webp', width: '960', height: '437', loading: 'lazy', decoding: 'async',
+        alt: 'Örnek: video oynatıcısının altında Türkçe altyazı, sağ üstte Altyazı Şefi paneli.' }),
+      el('figcaption', { class: 'as-hint' }, 'Örnek görünüm (deneme sayfası). Panel sağ üstte, Türkçe altyazı videonun üstünde çıkar.'));
+    var mgr = isMac() ? 'Cmd+Option+B' : 'Ctrl+Shift+O';
+    var faq = el('dl', { class: 'as-guide__faq' },
+      el('div', null, el('dt', null, 'Kod adres çubuğuna gitti'),
+        el('dd', null, 'Esc\'ye basın. Kod adres çubuğundan çalışmaz, çünkü tarayıcı oraya yapıştırılan kodun başını siler. Düğmeyi adres çubuğunun altındaki ince çubuğa bırakın.')),
+      el('div', null, el('dt', null, 'Bu sitede tıkladım, bir şey olmadı'),
+        el('dd', null, 'Düğme yalnızca YouTube\'un kendi sayfasında (youtube.com) çalışır. Bu sitedeki oynatıcıda çalışmaz. Videonun altındaki "YouTube\'da aç" ile videoyu YouTube\'da açıp orada tıklayın.')),
+      el('div', null, el('dt', null, 'Çubukta iki tane oldu'),
+        el('dd', null, mgr + ' ile yer imi yöneticisini açın, "altyazı" diye aratın ve fazlasını silin.')),
+      el('div', null, el('dt', null, 'Panel "Bu videoda altyazı yok" diyor'),
+        el('dd', null, 'O videonun hiç altyazısı yok. Konuşmayı çevirmek için "Canlı çeviri" bölümünü kullanın.')),
+      el('div', null, el('dt', null, 'Site güncellendi'),
+        el('dd', null, 'Yer imi, eklendiği andaki sürümle çalışır. Yeni özellikler için eski yer imini silip düğmeyi yeniden sürükleyin.')));
+    var closeX = el('button', { class: 'as-icon-btn', type: 'button', 'aria-label': 'Kapat', title: 'Kapat', 'data-role': 'bm-guide-close', on: { click: close } }, k.icon('close'));
+    var inner = el('div', { class: 'as-guide__in' },
+      el('div', { class: 'as-guide__head' },
+        el('div', { class: 'as-grow' },
+          el('h2', { id: 'as-guide-title' }, 'Yer imi düğmesi nasıl kurulur?'),
+          el('p', { class: 'as-hint' }, 'Bir kez kurarsınız. Sonra YouTube\'da her videoda tek tıkla Türkçe altyazı ve reklamsız izleme.')),
+        closeX),
+      el('ol', { class: 'as-guide__steps' },
+        guideStep('Yer imleri çubuğunu açın', [kbds('Shift', 'B'), ' tuşlarına basın. Adres çubuğunun hemen altında ince bir şerit açılır. Bu şerit yer imleri çubuğudur. Zaten görünüyorsa bu adımı atlayın.'],
+          mock({ label: 'Çizim: adres çubuğunun altında yer imleri çubuğu işaretli.', url: 'serkan737526.github.io/altyazi-sefi', bar: 'hl',
+            page: el('div', { class: 'as-gm__big' }, kbds('Shift', 'B')) })),
+        guideStep('Turuncu düğmeyi bu çubuğa sürükleyin', 'Farenin sol tuşuyla turuncu "Altyazı Şefi (YouTube)" düğmesini tutun, bırakmadan yukarı çekin ve yer imleri çubuğuna bırakın. Adres çubuğuna bırakmayın, orada çalışmaz. Bunu bir kez yaparsınız.',
+          mock({ label: 'Çizim: turuncu düğme yukarıdaki yer imleri çubuğuna sürükleniyor; adres çubuğu yanlış yer olarak işaretli.', url: 'serkan737526.github.io/altyazi-sefi', urlNo: true, bar: 'drop',
+            page: [arrowUp('as-gm__arrow'), el('span', { class: 'as-gm__orange' }, '▶ Altyazı Şefi (YouTube)')] })),
+        guideStep('YouTube\'da videoyu açın, yer imine tıklayın', 'Videoyu YouTube\'un kendi sayfasında açın. Sonra yer imleri çubuğundaki "Altyazı Şefi (YouTube)"a bir kez tıklayın.',
+          mock({ label: 'Çizim: youtube.com sayfasında yer imleri çubuğundaki Altyazı Şefi düğmesine tıklanıyor.', url: 'youtube.com/watch?v=…', bar: 'click',
+            page: el('div', { class: 'as-gm__video' }) })),
+        guideStep('Türkçe altyazı videonun üstüne gelir', 'Sağ üstte Altyazı Şefi paneli açılır, reklamlar atlanır. Panelden altyazı dilini seçebilir, yazıyı büyütebilir, Türkçe SRT indirebilirsiniz. Başka videoya geçince yeniden tıklamanız gerekmez.', shot)),
+      el('section', { class: 'as-guide__sec', 'data-role': 'bm-guide-alt' },
+        el('h3', null, 'Sürükleyemiyorsanız'),
+        el('ol', null,
+          el('li', null, kbds('D'), ' ile bu sayfayı yer imlerine ekleyin. Klasör sorulursa "Yer imleri çubuğu"nu seçin.'),
+          el('li', null, 'Aşağıdaki "Kodu kopyala"ya basın.'),
+          el('li', null, 'Yer imleri çubuğundaki yeni yer imine sağ tıklayıp "Düzenle"yi seçin.'),
+          el('li', null, 'Adını "Altyazı Şefi" yapın. URL kutusundakini silip kodu yapıştırın ve kaydedin.')),
+        el('div', { class: 'as-row' }, copy),
+        gmsg),
+      el('section', { class: 'as-guide__sec' }, el('h3', null, 'Olmadıysa'), faq),
+      el('div', { class: 'as-guide__foot' },
+        el('button', { class: 'as-btn as-btn--primary', type: 'button', 'data-role': 'bm-guide-ok', on: { click: close } }, 'Anladım')));
+    dlg.appendChild(inner);
+    return dlg;
+  }
+
+  /** Resimli anlatımı açar (YouTube bölümündeki kart ve Yardım bölümü kullanır). */
+  function openGuide() {
+    if (!guideDlg) guideDlg = buildGuide();
+    if (!guideDlg.isConnected) document.body.appendChild(guideDlg);
+    if (!guideDlg.open) {
+      if (typeof guideDlg.showModal === 'function') {
+        try { guideDlg.showModal(); } catch (e) { guideDlg.setAttribute('open', ''); }
+      } else guideDlg.setAttribute('open', '');
+    }
+    var sc = guideDlg.querySelector('.as-guide__in');
+    if (sc) sc.scrollTop = 0;
+    return guideDlg;
+  }
+
+  /** Sürüklerken sayfanın üstünde "yukarıdaki çubuğa bırak" ipucu */
+  function dragHint(on) {
+    if (on) {
+      if (!hintEl) {
+        hintEl = el('div', { class: 'as-drag-hint', role: 'status', 'data-role': 'bm-drag-hint' },
+          arrowUp(null, 30),
+          el('span', null, 'Yukarıdaki yer imleri çubuğuna bırakın, adres çubuğuna değil. Çubuk yoksa Esc, sonra ' + keys('Shift', 'B') + '.'));
+      }
+      if (!hintEl.isConnected) document.body.appendChild(hintEl);
+    } else if (hintEl && hintEl.parentNode) {
+      hintEl.parentNode.removeChild(hintEl);
+    }
+  }
+
+  AS.ytGuide = { open: openGuide };
 
   function showLinkError(s, msg) {
     AS.util.clear(s.linkErr);

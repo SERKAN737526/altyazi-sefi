@@ -9,7 +9,7 @@
  * Kitaplık veya kabuk değişince VERSION artırılır; eski "as-shell-*" / "as-lib-*" önbellekleri silinir. */
 'use strict';
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const SHELL_CACHE = 'as-shell-' + VERSION;
 const LIB_CACHE = 'as-lib-' + VERSION;
 const OWN_PREFIXES = ['as-shell-', 'as-lib-'];
@@ -21,6 +21,7 @@ const SHELL_FILES = [
   'manifest.webmanifest',
   'css/app.css',
   'js/ns.js',
+  'js/lock.js',
   'js/srt.js',
   'js/translate.js',
   'js/assembler.js',
@@ -43,7 +44,8 @@ const SHELL_FILES = [
   'icons/icon-512.png',
   'icons/icon-maskable-192.png',
   'icons/icon-maskable-512.png',
-  'icons/apple-touch-icon.png'
+  'icons/apple-touch-icon.png',
+  'img/yer-imi-ornek.webp'
 ];
 
 /** Her açılışta gereken küçük kitaplık dosyaları: kurulumda alınır. */

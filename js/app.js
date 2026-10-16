@@ -1002,6 +1002,10 @@
       el('strong', null, '"Altyazı Şefi (YouTube)"'), ' düğmesini bir kez yer imleri çubuğuna sürükleyin. YouTube\'da videoyu açıp bu yer imine tıklayın; ' +
       'Türkçe altyazı videonun üstünde çıkar, sağ üstteki panelden Türkçe SRT indirebilirsiniz.'));
     yt.appendChild(el('p', null, 'Reklamlar: Bu sitedeki gömülü oynatıcının içindeki reklamlara bir web sitesi dokunamaz. Reklamsız izlemek için videoyu YouTube\'da açıp "Altyazı Şefi (YouTube)" yer imine tıklayın; reklamlar atlanır.'));
+    yt.appendChild(el('p', null, el('button', {
+      class: 'as-btn as-btn--sm', type: 'button', 'data-role': 'help-bm-guide',
+      on: { click: function () { if (AS.ytGuide) AS.ytGuide.open(); } }
+    }, 'Yer imi düğmesi: resimli kurulum anlatımı')));
 
     var pipCard = card('pip', 'Altyazı penceresi', 'Her zaman üstte duran küçük pencere');
     pipCard.appendChild(el('ul', null,
@@ -1152,6 +1156,11 @@
     active: function () { return ui.active; }
   };
 
-  if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', start, { once: true });
-  else start();
+  /** Açılış: önce cihaz kilidi (js/lock.js), kod geçerliyse uygulama. */
+  function boot() {
+    if (AS.lock && typeof AS.lock.gate === 'function') AS.lock.gate(start);
+    else start();
+  }
+  if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', boot, { once: true });
+  else boot();
 })(typeof window !== 'undefined' ? window : globalThis);
