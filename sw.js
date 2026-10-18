@@ -9,7 +9,7 @@
  * Kitaplık veya kabuk değişince VERSION artırılır; eski "as-shell-*" / "as-lib-*" önbellekleri silinir. */
 'use strict';
 
-const VERSION = 'v5';
+const VERSION = 'v6';
 const SHELL_CACHE = 'as-shell-' + VERSION;
 const LIB_CACHE = 'as-lib-' + VERSION;
 const OWN_PREFIXES = ['as-shell-', 'as-lib-'];

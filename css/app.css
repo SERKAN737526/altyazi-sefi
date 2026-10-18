@@ -710,3 +710,7 @@ html.as-pip-doc, html.as-pip-doc body { margin: 0; height: 100%; background: #00
 .as-lock__input { width: 100%; min-height: 84px; resize: vertical; font: 13px/1.45 var(--font-mono); word-break: break-all; }
 .as-lock__foot { margin: 0; }
 @media (max-width: 480px) { .as-lock { padding: 18px; } .as-lock__device { font-size: 22px; } }
+.as-lock__wait { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.as-lock__wait::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #34d399; animation: as-lock-pulse 1.6s ease-in-out infinite; }
+@keyframes as-lock-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .as-lock__wait::before { animation: none; } }

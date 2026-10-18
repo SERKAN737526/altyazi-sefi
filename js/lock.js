@@ -24,6 +24,10 @@
     x: 'J97ivMlgxgO5Y0GKoJO9zT_wAzSAf23SQXRR_wf6Has',
     y: 'mUA74qREwC_UWhe95awz841Tjl4i1gdVGSYGWaVKLu4'
   };
+  /* Onay sunucusu (altyazi-sefi-sunucu/worker.js): Serkan Şefi Kod'da kod üretince kod buraya bırakılır, kilit ekranı
+   * birkaç saniyede bir sorar ve kodu alıp burada doğrular. Sunucuya ulaşılamazsa kod yine elle yapıştırılır.
+   * Yerel sunucuda ?onay=<adres> başka bir adres kullandırır (testler). index.html CSP connect-src bu adresi içermeli. */
+  var ONAY_URL = 'https://altyazi-sefi-onay.blue737526.workers.dev';
   var LS_DEVICE = 'as.lock.device';
   var LS_CODE = 'as.lock.code';
   var PREFIX = 'AS1.';
@@ -171,6 +175,48 @@
     stale: 'Bu bilgisayarın kodunun süresi dolmuş ya da kod artık geçerli değil. Yeni bir kod isteyin.'
   };
 
+  /* ---------------- onay sunucusu ---------------- */
+  function onayBase() {
+    var tp = localParams();
+    var u = (tp && tp.onay) || ONAY_URL;
+    return /^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(u) || (tp && /^http:\/\/127\.0\.0\.1:\d+$/.test(u)) ? u : null;
+  }
+  /** Kilit ekranı açıkken sunucuya sorar; geçerli kod gelince onCode(kod) bir kez çağrılır. Dönen işlev durdurur.
+   *  Sayfa görünmezken sormaz; zamanla ve hata olursa seyrekleşir (en çok dakikada bir). */
+  function watchOnay(device, onCode) {
+    var base = onayBase();
+    if (!base || typeof root.fetch !== 'function') return function () {};
+    var stopped = false, timer = null, wait = 3000, t0 = Date.now();
+    // ilk 10 dk 3 sn'de bir, sonra 15 sn, 1 saatten sonra dakikada bir (sunucunun ücretsiz kotası için)
+    function base3() { var e = Date.now() - t0; return e < 600000 ? 3000 : e < 3600000 ? 15000 : 60000; }
+    function next(ms) { if (!stopped) timer = setTimeout(tick, Math.max(ms, base3())); }
+    function tick() {
+      timer = null;
+      if (stopped) return;
+      if (doc.visibilityState === 'hidden') { next(1500); return; }
+      root.fetch(base + '/onay/' + device, { cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('durum ' + r.status);
+          wait = base3();
+          return r.json();
+        })
+        .then(function (j) {
+          if (stopped) return;
+          if (j && typeof j.code === 'string' && j.code.length < 300) {
+            return check(j.code, device).then(function (res) {
+              if (stopped) return;
+              if (res.ok) { stopped = true; onCode(res); return; }
+              next(wait);
+            });
+          }
+          next(wait);
+        })
+        .catch(function () { wait = Math.min(60000, Math.max(wait, base3()) * 2); next(wait); });
+    }
+    next(1000);
+    return function () { stopped = true; if (timer) clearTimeout(timer); };
+  }
+
   /* ---------------- kilit ekranı ---------------- */
   function el() { return AS.util.el.apply(null, arguments); }
 
@@ -231,6 +277,13 @@
     });
     var go = el('button', { class: 'as-btn as-btn--primary', type: 'button', 'data-role': 'lock-go' }, 'Etkinleştir');
     var busy = false;
+    var stopWatch = function () {};
+    function done(r) {
+      stopWatch();
+      lsSet(LS_CODE, r.code);
+      note('ok', 'Etkinleştirildi.');
+      onOk(r);
+    }
     function submit() {
       if (busy) return;
       var v = input.value;
@@ -239,9 +292,7 @@
       check(v, device).then(function (r) {
         if (!r.ok) { busy = false; go.disabled = false; note('error', MESSAGES[r.reason] || MESSAGES.signature); return; }
         // başarıda düğme kilitli kalır: art arda basış uygulamayı iki kez başlatmasın
-        lsSet(LS_CODE, r.code);
-        note('ok', 'Etkinleştirildi.');
-        onOk(r);
+        done(r);
       });
     }
     go.addEventListener('click', submit);
@@ -263,7 +314,9 @@
       el('ol', { class: 'as-lock__steps' },
         el('li', null,
           el('div', { class: 'as-lock__label' }, 'Bu bilgisayarın kodu'),
-          devRow),
+          devRow,
+          onayBase() ? el('div', { class: 'as-hint as-lock__wait', 'data-role': 'lock-wait' },
+            'Serkan onaylayınca bu sayfa birkaç saniye içinde kendiliğinden açılır. Açık bırakın.') : null),
         el('li', null,
           el('label', { class: 'as-lock__label', for: 'as-lock-code' }, 'Gelen etkinleştirme kodunu yapıştırın'),
           input,
@@ -273,6 +326,11 @@
         'Kod yalnızca bu bilgisayarda ve bu tarayıcıda çalışır. Tarayıcı verilerini silerseniz yeni bir kod gerekir. Etkinleştirdikten sonra internet olmadan da açılır.'));
     rootEl.appendChild(el('div', { class: 'as-lock-wrap' }, card));
     if (firstMsg) note('warn', firstMsg);
+    stopWatch = watchOnay(device, function (r) {
+      if (busy) return;
+      busy = true; go.disabled = true;
+      done(r);
+    });
     try { input.focus({ preventScroll: true }); } catch (e) { /* */ }
   }
   function selectText(node) {
@@ -318,6 +376,6 @@
     unlocked: function () { return state.unlocked; },
     expires: function () { return expiryDate(state.expDay); },
     /* saf işlevler (Node testleri) */
-    _parseCode: parseCode, _normDevice: normDevice, _b32encode: b32encode, _b32decode: b32decode, _expired: expired, _check: check
+    _parseCode: parseCode, _normDevice: normDevice, _b32encode: b32encode, _b32decode: b32decode, _expired: expired, _check: check, _onayBase: onayBase
   };
 })(typeof window !== 'undefined' ? window : globalThis);
