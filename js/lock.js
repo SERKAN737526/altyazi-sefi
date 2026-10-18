@@ -174,6 +174,40 @@
   /* ---------------- kilit ekranı ---------------- */
   function el() { return AS.util.el.apply(null, arguments); }
 
+  /** Cihaz kodunun karekodu ("ASD1:" + 8 karakter): Serkan'ın telefonundaki Şefi Kod ekranın fotoğrafından bunu okur.
+   *  lib/qrcode/qrcode.js yüklenemezse null (kilit ekranı karekodsuz çalışmaya devam eder). */
+  function qrNode(device) {
+    var Q = root.qrcode;
+    if (typeof Q !== 'function') return null;
+    try {
+      var q = Q(0, 'M');
+      q.addData('ASD1:' + device, 'Alphanumeric');
+      q.make();
+      var n = q.getModuleCount(), qz = 4, size = n + 2 * qz, d = '';
+      for (var r = 0; r < n; r++) {
+        for (var c = 0; c < n; c++) if (q.isDark(r, c)) d += 'M' + (c + qz) + ' ' + (r + qz) + 'h1v1h-1z';
+      }
+      var NS = 'http://www.w3.org/2000/svg';
+      var svg = doc.createElementNS(NS, 'svg');
+      svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+      svg.setAttribute('shape-rendering', 'crispEdges');
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'Bu bilgisayarın kodunun karekodu');
+      var bg = doc.createElementNS(NS, 'rect');
+      bg.setAttribute('width', String(size));
+      bg.setAttribute('height', String(size));
+      bg.setAttribute('fill', '#fff');
+      var path = doc.createElementNS(NS, 'path');
+      path.setAttribute('d', d);
+      path.setAttribute('fill', '#000');
+      svg.appendChild(bg);
+      svg.appendChild(path);
+      return svg;
+    } catch (e) {
+      return null;
+    }
+  }
+
   function render(rootEl, device, onOk, firstMsg) {
     AS.util.clear(rootEl);
     var msg = el('div', { 'aria-live': 'polite', 'data-role': 'lock-msg' });
@@ -213,6 +247,13 @@
     go.addEventListener('click', submit);
     input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } });
 
+    var devCol = el('div', { class: 'as-lock__devcol' },
+      el('div', { class: 'as-row' }, devEl, copyBtn),
+      el('div', { class: 'as-hint' }, 'Bu kodu Serkan\'a gönderin (WhatsApp, mesaj).'));
+    var qr = qrNode(device);
+    var devRow = !qr ? devCol : el('div', { class: 'as-lock__devrow' }, devCol,
+      el('figure', { class: 'as-lock__qr', 'data-role': 'lock-qr', 'data-qr': 'ASD1:' + device }, qr,
+        el('figcaption', null, 'Ya da bu ekranın fotoğrafını gönderin')));
     var card = el('section', { class: 'as-card as-lock', 'data-role': 'lock', 'aria-labelledby': 'as-lock-title' },
       el('div', { class: 'as-lock__brand' },
         el('img', { src: 'icons/logo.svg', alt: '', width: '56', height: '56' }),
@@ -222,8 +263,7 @@
       el('ol', { class: 'as-lock__steps' },
         el('li', null,
           el('div', { class: 'as-lock__label' }, 'Bu bilgisayarın kodu'),
-          el('div', { class: 'as-row' }, devEl, copyBtn),
-          el('div', { class: 'as-hint' }, 'Bu kodu Serkan\'a gönderin (WhatsApp, mesaj).')),
+          devRow),
         el('li', null,
           el('label', { class: 'as-lock__label', for: 'as-lock-code' }, 'Gelen etkinleştirme kodunu yapıştırın'),
           input,

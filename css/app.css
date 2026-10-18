@@ -702,6 +702,11 @@ html.as-pip-doc, html.as-pip-doc body { margin: 0; height: 100%; background: #00
   font: 700 28px/1.2 var(--font-mono); letter-spacing: 0.08em; padding: 8px 14px; border-radius: 10px;
   background: var(--surface-3); border: 1px solid var(--border-strong); -webkit-user-select: all; user-select: all;
 }
+.as-lock__devrow { display: flex; align-items: center; justify-content: space-between; gap: 12px 18px; flex-wrap: wrap; }
+.as-lock__devcol { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.as-lock__qr { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.as-lock__qr svg { display: block; width: 136px; height: 136px; border-radius: 8px; background: #fff; }
+.as-lock__qr figcaption { color: var(--muted); font-size: 12px; text-align: center; max-width: 150px; }
 .as-lock__input { width: 100%; min-height: 84px; resize: vertical; font: 13px/1.45 var(--font-mono); word-break: break-all; }
 .as-lock__foot { margin: 0; }
 @media (max-width: 480px) { .as-lock { padding: 18px; } .as-lock__device { font-size: 22px; } }

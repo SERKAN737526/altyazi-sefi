@@ -9,7 +9,7 @@
  * Kitaplık veya kabuk değişince VERSION artırılır; eski "as-shell-*" / "as-lib-*" önbellekleri silinir. */
 'use strict';
 
-const VERSION = 'v4';
+const VERSION = 'v5';
 const SHELL_CACHE = 'as-shell-' + VERSION;
 const LIB_CACHE = 'as-lib-' + VERSION;
 const OWN_PREFIXES = ['as-shell-', 'as-lib-'];
@@ -49,12 +49,13 @@ const SHELL_FILES = [
 ];
 
 /** Her açılışta gereken küçük kitaplık dosyaları: kurulumda alınır. */
-const LIB_EARLY = ['lib/tesseract/tesseract.min.js'];
+const LIB_EARLY = ['lib/tesseract/tesseract.min.js', 'lib/qrcode/qrcode.js'];
 
 /** "Çevrimdışı için hazırla": tüm kitaplıklar. tesseract.js işçisi OEM 1 (yalnız LSTM) ile yalnızca
  *  *-lstm.wasm.js çekirdeklerini yükler (wasm içlerine gömülüdür): SIMD olan ve olmayan sürüm. */
 const LIB_FILES = [
   'lib/tesseract/tesseract.min.js',
+  'lib/qrcode/qrcode.js',
   'lib/tesseract/worker.min.js',
   'lib/tesseract/core/tesseract-core-simd-lstm.wasm.js',
   'lib/tesseract/core/tesseract-core-lstm.wasm.js',
